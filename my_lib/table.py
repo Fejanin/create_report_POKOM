@@ -1,15 +1,15 @@
 class Row:
+    flag = False
     def __new__(cls, name=None, *args, **kwargs):
         '''Создает объект класса только если передан аргумент - name.'''
         if name:
             return super().__new__(cls)
 
     
-    def __init__(self, name, flag=False):
+    def __init__(self, name):
         self.name = name # Номенклатура
         self.units_of_measurement = None # Ед. изм.
-        if flag:
-            self.promotion = None # Акция, не для Симферополя !!!!!!!!!!!!!!!!!!!!!!
+        self.promotion = None # Акция, не для Симферополя !!!!!!!!!!!!!!!!!!!!!!
         self.initial_balance = None # Начальный остаток
         self.receipt_of_products = None # Приход
         self.sales = None # Продажи
@@ -24,6 +24,7 @@ class Row:
         self.average_values = {}  # средние значения продаж => {'17,11,': 100, '24,11,': 111, ...}
         self.clients = {'медв': None, 'тк': None, 'атпр': None, 'пудп': None}
         self.comments = None
+        self.flag = True
 
 
     def get_columns(self):
@@ -35,9 +36,23 @@ class Row:
             return self.name == obj.name
         return self.name == obj
 
+    def __lt__(self, obj):
+        if obj.__class__.__name__ == 'Row':
+            return self.name < obj.name
+        return self.name < obj
+
 
     def __str__(self):
         return self.name
+
+
+    def __setattr__(self, key, value):
+        if self.flag:
+            # print('\nFLAG => TRUE')
+            # print(f'{key = }, {value = }')
+            # TODO присвоение данных в словари должно проходить проверку!!!
+            pass
+        self.__dict__[key] = value
 
 
 class Table:
@@ -53,39 +68,50 @@ class Table:
         'expiration_dates': ['сроки', 9],
         'declared': ['заяв', 10],
         'diff': ['разн', 11],
-        'orders_is_on_the_way': ['заказ в пути', 8],
-        'pud': ['пуд', 1],
-        'new_average_sales': ['ср нов', 1],
-        'order': ['заказ', 1],
-        'remains': ['кон ост', 1],
-        'fact': ['факт', 1],
-        'clients': ['опты', 4],
-        'average_values': ['ср', 3],
+        'orders_is_on_the_way': ['заказ в пути', {12: None, 13: None, 14: None, 15: None, 16: None, 17: None, 18: None}],
+        'pud': ['пуд', 19],
+        'new_average_sales': ['ср нов', 20],
+        'order': ['заказ', 21],
+        'remains': ['кон ост', 22],
+        'fact': ['факт', 23],
+        'clients': ['опты', {24: 'медв', 25: 'тк', 26: 'атпр', 27: 'пудп'}],
+        'average_values': ['ср', {28: None, 29: None, 30: None}],
         'comments': ['комментарии', 1],
-        'sum': ['сум', 1],
-        'weight': ['вес', 1]
+        'sum': ['сум', 31],
+        'weight': ['вес', 32]
     }
+    START_HEADER = 3
+    START_ROWS = 6
+    ORDERS_IS_ON_THE_WAY = {}
+    AVERAGE_VALUES = {}
+    
     def __init__(self):
         self.rows = []
-        self.all_orders_is_on_the_way = {}
-        self.all_clients = {'медв': None, 'тк', 'атпр', 'пудп'}
-        self.all_average_values = {}
+        self.date = None
 
 
+    def add_row(self, row):
+        self.rows.append(row)
 
 
     def create_header(self):
-        for i in self.COLUMNS:
-            print([i] * self.COLUMNS[i][1])
+        print(vars(Table)['COLUMNS'])
+
+
+    def get_rows(self):
+        '''
+        Return sorted list self.rows
+        '''
+        return sorted(self.rows)
 
 
 
 
 if __name__ == '__main__':
     r1 = Row('TEST')
-    print(r1.get_columns()) # получаем словарь аргументов и их значений
+    print(f"{r1.get_columns() = }") # получаем словарь аргументов и их значений
     r1.name = 'Obj'
-    print(r1 == 'Obj') # сравнение на равенство объкта со строкой
+    print(f"{r1 == 'Obj' = }") # сравнение на равенство объкта со строкой
     data = [r1]
     r2 = Row('TEST_2')
     data.append(r2)
@@ -95,15 +121,21 @@ if __name__ == '__main__':
     r4 = Row('TEST_4')
     r4.name = 'ABC'
     data.append(r4)
-    print(*data)
-    print('Obj' in data) # определение вхождения
-    print(data.index('Obj'), data.index(r1)) # нахождение индекса объекта по имени и самому объекту
-    print(r1 == r2) # Сравнение объектов по имени
-    print(r1 == r3) # Сравнение объектов по имени
-    # print(sorted(data)) # TypeError: '<' not supported between instances of 'Row' and 'Row'
+    print('data =', *data)
+    print(f"{'Obj' in data = }") # определение вхождения
+    print(f"{data.index('Obj') = }, {data.index(r1) = }") # нахождение индекса объекта по имени и самому объекту
+    print(f"{r1 == r2 = }") # Сравнение объектов по имени
+    print(f"{r1 == r3 = }") # Сравнение объектов по имени
+    sorted_list = sorted(data)
+    print(f"{sorted_list = }")
+    print(*[(i, i.name) for i in sorted_list], sep='\n')
     ##################################################
-
-
 
     t = Table()
     t.create_header()
+    t.add_row(r1)
+    t.add_row(r2)
+    t.add_row(r4)
+    print(f"{t.get_rows() = }")
+    print(f"{t.get_rows().index('ABC') = }")
+    

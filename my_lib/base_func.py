@@ -1,59 +1,57 @@
 import openpyxl
+from my_lib.table import Table, Row
 
+def read_xlsx_file(file):
 
-def get_base_form(file):
     wb = openpyxl.load_workbook(file)
     ws = wb.active
-
     max_col = ws.max_column
     max_row = ws.max_row
+    return wb, ws, max_col, max_row
 
-    NOMENKLATURA = ['Номенклатура', None]
-    EDINICI_IZMERENIJ = ['Ед. изм.', None]
-    NACHALNIJ_JSTATOK = ['Начальный остаток', None]
-    PRIHOD = ['Приход', None]
-    KONECHNIJ_OSTATOK = ['Конечный остаток', None]
-    ALL_COLUMNS = [NOMENKLATURA, EDINICI_IZMERENIJ, NACHALNIJ_JSTATOK, PRIHOD, KONECHNIJ_OSTATOK]
+def create_base_table_from_dv_file(file):
+    table = Table()
+    wb, ws, max_col, max_row = read_xlsx_file(file)
 
+    all_columns = {
+        'name_sku': None,  # Номенклатура
+        'units_of_measurement': None,  # Ед. изм.
+        'initial_balance': None,  # Начальный остаток
+        'receipt_of_products': None,  # Приход
+        'final_balance': None  # Конечный остаток
+    }
 
-    res = {}
-    all_col = []
-
-    is_once = True
     flag = False
     for row in range(1, max_row + 1):
         for col in range(1, max_col + 1):
-            if not NOMENKLATURA[1]:
-                if ws.cell(row = row, column = col).value == NOMENKLATURA[0]:
-                    NOMENKLATURA[1] = col
-            if not EDINICI_IZMERENIJ[1]:
-                if ws.cell(row = row, column = col).value == EDINICI_IZMERENIJ[0]:
-                    EDINICI_IZMERENIJ[1] = col
-            if not NACHALNIJ_JSTATOK[1]:
-                if ws.cell(row = row, column = col).value == NACHALNIJ_JSTATOK[0]:
-                    NACHALNIJ_JSTATOK[1] = col
-            if not PRIHOD[1]:
-                if ws.cell(row = row, column = col).value == PRIHOD[0]:
-                    PRIHOD[1] = col
-            if not KONECHNIJ_OSTATOK[1]:
-                if ws.cell(row = row, column = col).value == KONECHNIJ_OSTATOK[0]:
-                    KONECHNIJ_OSTATOK[1] = col
-            if NOMENKLATURA[1] and EDINICI_IZMERENIJ[1] and NACHALNIJ_JSTATOK[1] and PRIHOD[1] and KONECHNIJ_OSTATOK[1] and is_once:
-                # print(NOMENKLATURA[1], EDINICI_IZMERENIJ[1], NACHALNIJ_JSTATOK[1], PRIHOD[1], KONECHNIJ_OSTATOK[1])
-                all_num_col = [NOMENKLATURA[1], EDINICI_IZMERENIJ[1], NACHALNIJ_JSTATOK[1], PRIHOD[1], KONECHNIJ_OSTATOK[1]]
-                is_once = False
-            if ws.cell(row = row, column = col).value == 'Основной склад ПОКОМ':
-                flag = True
-            elif ws.cell(row = row, column = col).value == 'Склад корректировок':
-                flag = False
-            if flag and col in all_num_col:
-                name_col = list(filter(lambda x: x[1] == col, ALL_COLUMNS))[0][0]
-                value_col = ws.cell(row = row, column = col).value
-                #print(f'{name_col}: {value_col}', end=' # ')
-                
-                if name_col == NOMENKLATURA[0]:
-                    res[value_col] = {}
-                    new_key = value_col
-                else:
-                    res[new_key].update({name_col: value_col})
-    return res, ALL_COLUMNS
+            if not all(all_columns.values()):
+                if ws.cell(row=row, column=col).value == 'Номенклатура':
+                    all_columns['name_sku'] = col
+                if ws.cell(row=row, column=col).value == 'Ед. изм.':
+                    all_columns['units_of_measurement'] = col
+                if ws.cell(row=row, column=col).value == 'Начальный остаток':
+                    all_columns['initial_balance'] = col
+                if ws.cell(row=row, column=col).value == 'Приход':
+                    all_columns['receipt_of_products'] = col
+                if ws.cell(row=row, column=col).value == 'Конечный остаток':
+                    all_columns['final_balance'] = col
+            if flag and col in all_columns.values():
+                # print(ws.cell(row=row, column=col).value, end=' # ')
+                if col == all_columns['name_sku']:
+                    current_name_row = ws.cell(row=row, column=col).value
+                    table.add_row(Row(current_name_row))
+                elif col == all_columns['units_of_measurement']:
+                    r = table.rows[table.rows.index(current_name_row)].units_of_measurement = ws.cell(row=row, column=col).value
+                elif col == all_columns['initial_balance']:
+                    r = table.rows[table.rows.index(current_name_row)].initial_balance = ws.cell(row=row, column=col).value
+                elif col == all_columns['receipt_of_products']:
+                    r = table.rows[table.rows.index(current_name_row)].receipt_of_products = ws.cell(row=row, column=col).value
+                elif col == all_columns['final_balance']:
+                    r = table.rows[table.rows.index(current_name_row)].final_balance = ws.cell(row=row, column=col).value
+        if ws.cell(row=row, column=1).value == 'Основной склад ПОКОМ':
+            flag = True
+        if ws.cell(row=row + 1, column=1).value == 'Склад корректировок':
+            flag = False
+    return table
+
+

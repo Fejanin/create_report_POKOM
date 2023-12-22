@@ -1,42 +1,57 @@
-import openpyxl
-from my_lib.base_func import get_base_form
+from my_lib.base_func import create_base_table_from_dv_file
+from my_lib.base_func import read_xlsx_file
+import os
+import re
+
+
+# получаем список файлов для обработки
+all_files_list = [i for i in os.listdir() if '.xlsx' in i]
+groups_of_files = {
+    'движение': [re.findall(r'дв ([0-9]+,){2}[0-9]+пок\.xlsx', i) for i in all_files_list],
+    'оптовики': None,
+    'продажи': None,
+    'заявлено': None
+}
 
 
 
-# Номенклатура | Ед. изм. | Начальный остаток | Приход | Расход | Конечный остаток | метка | крат | сроки | заяв | разн |
-# => заказ | заказ | заказ | заказ | заказ | заказ | заказ | пуд | заказ | заказ
-# =>| ср | заказ | кон ост | факт | медв | тк | атпр | пудп | ср | ср | пр | коментарии | сум | вес
+
+# за основу берем файл движения
+file_dv = 'дв 29,11,23пок.xlsx'
+table = create_base_table_from_dv_file(file_dv)
+
+'''
+for i in table.get_rows():
+    print(i.name, i.units_of_measurement, i.initial_balance, i.receipt_of_products, i.final_balance)
+'''
+
+# файл расчета прошлой недели
 
 
 
-file = 'дв 29,11,23пок.xlsx'
-res, ALL_COLUMNS = get_base_form(file)
-
-new_file_name = 'test.xlsx'
-res_wb = openpyxl.Workbook()
-res_ws = res_wb.active
 
 
 
-for r, item in enumerate(res, 1):
-    if r == 3:
-        for c, i in enumerate(ALL_COLUMNS, 1):
-            if ALL_COLUMNS[c - 1][0] == 'Конечный остаток':
-                res_ws.cell(row=r, column=c + 1).value = ALL_COLUMNS[c - 1][0]
-            else:
-                res_ws.cell(row = r, column = c).value = ALL_COLUMNS[c - 1][0]
-    elif r > 3:
-        res_ws.cell(row=r, column=1).value = item
-        for c in range(1, len(ALL_COLUMNS)):
-            if ALL_COLUMNS[c][0] == 'Конечный остаток':
-                res_ws.cell(row=r, column=c + 2).value = res[item][ALL_COLUMNS[c][0]]
-            else:
-                try:
-                    res_ws.cell(row=r, column=c + 1).value = round(float(res[item][ALL_COLUMNS[c][0]]))
-                except:
-                    res_ws.cell(row=r, column=c + 1).value = res[item][ALL_COLUMNS[c][0]]
-        
-    
 
-res_wb.save(filename=new_file_name)
 
+
+
+
+
+
+'''
+file_sales = 'пр 23-29,11,23.xlsx'
+
+columns = {'Номенклатура': None, 'количество': None}
+
+workbook, worksheet, max_col, max_row = read_xlsx_file(file_sales)
+for row in range(1, max_row + 1):
+    if all(columns.values()):
+        print()
+    for col in range(1, max_col + 1):
+        if worksheet.cell(row=row, column=col).value in columns: # находим колонки: Номенклатура и количество
+            if not columns[worksheet.cell(row=row, column=col).value]:
+                columns[worksheet.cell(row=row, column=col).value] = col # связываем название колонки с ее номером
+        if col in columns.values():
+            print(worksheet.cell(row=row, column=col).value, end=' # ')
+'''
