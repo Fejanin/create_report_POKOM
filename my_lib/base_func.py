@@ -3,7 +3,7 @@ from my_lib.table import Table, Row
 
 def read_xlsx_file(file):
 
-    wb = openpyxl.load_workbook(file)
+    wb = openpyxl.load_workbook(file, data_only=True)
     ws = wb.active
     max_col = ws.max_column
     max_row = ws.max_row

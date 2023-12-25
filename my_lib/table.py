@@ -22,9 +22,14 @@ class Row:
         self.orders_is_on_the_way = {} # Заказы в пути {'29,11,': 50, '01,12,: 120}
         self.new_average_sales = None # self.sales / 5
         self.average_values = {}  # средние значения продаж => {'17,11,': 100, '24,11,': 111, ...}
-        self.clients = {'медв': None, 'тк': None, 'атпр': None, 'пудп': None}
-        self.comments = None
-        self.flag = True
+        self.medvedev_sales = None # медв
+        self.tk_sales = None # тк
+        self.atamanov_sales = None # атпр
+        self.pud_sales = None # пудп
+        self.comments = None # комментарии
+        self.sum = None # сум
+        self.weigth = None # вес
+        self.flag = True # после __init__, изменение атрибутов после прохождения проверки
 
 
     def get_columns(self):
@@ -69,12 +74,15 @@ class Table:
         'declared': ['заяв', 10],
         'diff': ['разн', 11],
         'orders_is_on_the_way': ['заказ в пути', {12: None, 13: None, 14: None, 15: None, 16: None, 17: None, 18: None}],
-        'pud': ['пуд', 19],
+        'pud_order': ['пуд', 19],
         'new_average_sales': ['ср нов', 20],
-        'order': ['заказ', 21],
+        'krim_order': ['заказ', 21],
         'remains': ['кон ост', 22],
         'fact': ['факт', 23],
-        'clients': ['опты', {24: 'медв', 25: 'тк', 26: 'атпр', 27: 'пудп'}],
+        'medvedev_sales': ['медв', 24],
+        'tk_sales': ['тк', 25],
+        'atamanov_sales': ['атпр', 26],
+        'pud_sales': ['пудп', 27],
         'average_values': ['ср', {28: None, 29: None, 30: None}],
         'comments': ['комментарии', 1],
         'sum': ['сум', 31],
