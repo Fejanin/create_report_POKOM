@@ -9,7 +9,6 @@ class Row:
     def __init__(self, name):
         self.name = name # Номенклатура
         self.units_of_measurement = None # Ед. изм.
-        self.promotion = None # Акция, не для Симферополя !!!!!!!!!!!!!!!!!!!!!!
         self.initial_balance = None # Начальный остаток
         self.receipt_of_products = None # Приход
         self.sales = None # Продажи
@@ -17,19 +16,14 @@ class Row:
         self.mark = None # Метка
         self.multiplicity = None # Кратность
         self.expiration_dates = None # Сроки годности
-        self.declared = None # Заявлено
-        self.diff = None # разность между заявлено и отгружено
+        self.declared = None # Заявлено | заяв
         self.orders_is_on_the_way = {} # Заказы в пути {'29,11,': 50, '01,12,: 120}
-        self.new_average_sales = None # self.sales / 5
         self.average_values = {}  # средние значения продаж => {'17,11,': 100, '24,11,': 111, ...}
         self.medvedev_sales = None # медв
         self.tk_sales = None # тк
         self.atamanov_sales = None # атпр
         self.pud_sales = None # пудп
         self.comments = None # комментарии
-        self.sum = None # сум
-        self.weigth = None # вес
-        self.flag = True # после __init__, изменение атрибутов после прохождения проверки
 
 
     def get_columns(self):
@@ -51,42 +45,33 @@ class Row:
         return self.name
 
 
-    def __setattr__(self, key, value):
-        if self.flag:
-            # print('\nFLAG => TRUE')
-            # print(f'{key = }, {value = }')
-            # TODO присвоение данных в словари должно проходить проверку!!!
-            pass
-        self.__dict__[key] = value
-
-
 class Table:
     COLUMNS = {
-        'name': ['Номенклатура', 1],
-        'units_of_measurement': ['Ед. изм.', 2],
-        'initial_balance': ['Начальный остаток', 3],
-        'receipt_of_products': ['Приход', 4],
-        'sales': ['Расход', 5],
-        'final_balance': ['Конечный остаток', 6],
-        'mark': ['метка', 7],
-        'multiplicity': ['крат', 8],
-        'expiration_dates': ['сроки', 9],
-        'declared': ['заяв', 10],
-        'diff': ['разн', 11],
-        'orders_is_on_the_way': ['заказ в пути', {12: None, 13: None, 14: None, 15: None, 16: None, 17: None, 18: None}],
-        'pud_order': ['пуд', 19],
-        'new_average_sales': ['ср нов', 20],
-        'krim_order': ['заказ', 21],
-        'remains': ['кон ост', 22],
-        'fact': ['факт', 23],
-        'medvedev_sales': ['медв', 24],
-        'tk_sales': ['тк', 25],
-        'atamanov_sales': ['атпр', 26],
-        'pud_sales': ['пудп', 27],
-        'average_values': ['ср', {28: None, 29: None, 30: None}],
-        'comments': ['комментарии', 1],
-        'sum': ['сум', 31],
-        'weight': ['вес', 32]
+        'name': ['Номенклатура', None],
+        'units_of_measurement': ['Ед. изм.', None],
+        'initial_balance': ['Начальный остаток', None],
+        'receipt_of_products': ['Приход', None],
+        'sales': ['Расход', None],
+        'final_balance': ['Конечный остаток', None],
+        'mark': ['метка', None],
+        'multiplicity': ['крат', None],
+        'expiration_dates': ['сроки', None],
+        'declared': ['заяв', None],
+        'diff': ['разн', None],
+        'orders_is_on_the_way': ['заказ в пути', {}],
+        'pud_order': ['пуд', None],
+        'new_average_sales': ['ср нов', None],
+        'krim_order': ['заказ', None],
+        'remains': ['кон ост', None],
+        'fact': ['факт', None],
+        'medvedev_sales': ['медв', None],
+        'tk_sales': ['тк', None],
+        'atamanov_sales': ['атпр', None],
+        'pud_sales': ['пудп', None],
+        'average_values': ['ср', {}],
+        'comments': ['комментарии', None],
+        'sum': ['сум', None],
+        'weight': ['вес', None]
     }
     START_HEADER = 3
     START_ROWS = 6
@@ -111,6 +96,11 @@ class Table:
         Return sorted list self.rows
         '''
         return sorted(self.rows)
+
+
+    # TODO
+    # метод для создания формул и вставку их в объекты Row, перед построением таблицы
+    # метод для нумерации колонок, перед построением таблицы
 
 
 
